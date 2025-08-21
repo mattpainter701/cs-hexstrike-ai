@@ -1,0 +1,28 @@
+{
+  "mcp": {
+    "servers": {
+      "hexstrike-ai": {
+        "type": "stdio",
+        "command": "python",
+        "args": [
+          "C:/Users/Home/deepseek/hexstrike-ai/hexstrike_mcp.py",
+          "--server",
+          "http://localhost:8888"
+        ],
+        "description": "HexStrike AI v6.0 - Advanced Cybersecurity Automation Platform",
+        "timeout": 300
+      }
+    }
+  },
+  "cursor.mcp.servers": {
+    "hexstrike-ai": {
+      "command": "python",
+      "args": [
+        "C:/Users/Home/deepseek/hexstrike-ai/hexstrike_mcp.py",
+        "--server", 
+        "http://localhost:8888"
+      ],
+      "description": "HexStrike AI Cybersecurity Tools"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+services:
+  hexstrike-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hexstrike-ai-platform
+    ports:
+      - "8888:8888"  # HexStrike MCP Server
+      - "8080:8080"  # Web Dashboard (if implemented)
+    volumes:
+      - ./data:/app/data
+      - ./results:/app/results
+      - ./logs:/app/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HEXSTRIKE_PORT=8888
+      - HEXSTRIKE_HOST=0.0.0.0
+      - HEXSTRIKE_DEBUG=false
+    restart: unless-stopped
+    privileged: true  # Required for some security tools
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - DAC_OVERRIDE
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+
+volumes:
+  hexstrike-data:
+  hexstrike-results:
+  hexstrike-logs:

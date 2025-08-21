@@ -1,0 +1,57 @@
+{
+  "mcpServers": {
+    "hexstrike-ai": {
+      "command": "python3",
+      "args": [
+        "C:\\Users\\Home\\deepseek\\hexstrike-ai\\hexstrike_mcp.py",
+        "--server",
+        "http://localhost:8888"
+      ],
+      "description": "HexStrike AI v6.0 - Advanced Cybersecurity Automation Platform with 150+ security tools and 12+ AI agents",
+      "timeout": 300,
+      "disabled": false,
+      "env": {
+        "HEXSTRIKE_SERVER_URL": "http://localhost:8888",
+        "HEXSTRIKE_DEBUG": "false",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  },
+  "globalSettings": {
+    "allowNetwork": true,
+    "allowFileSystem": false,
+    "maxConcurrentRequests": 10,
+    "requestTimeoutMs": 30000
+  },
+  "installation_instructions": {
+    "step_1": "Copy this configuration to your Claude Desktop config file",
+    "step_2_windows": "Location: %APPDATA%\\Claude\\claude_desktop_config.json",
+    "step_2_mac": "Location: ~/Library/Application Support/Claude/claude_desktop_config.json", 
+    "step_2_linux": "Location: ~/.config/Claude/claude_desktop_config.json",
+    "step_3": "Start the HexStrike Docker container: docker-compose up -d",
+    "step_4": "Restart Claude Desktop application",
+    "step_5": "Verify connection by asking Claude to run: 'Test HexStrike AI connection'"
+  },
+  "docker_commands": {
+    "build_and_start": "docker-compose up -d --build",
+    "start_existing": "docker-compose up -d", 
+    "stop": "docker-compose down",
+    "logs": "docker-compose logs -f hexstrike-ai",
+    "shell_access": "docker exec -it hexstrike-ai-platform /bin/bash",
+    "restart": "docker-compose restart hexstrike-ai"
+  },
+  "connection_details": {
+    "server_url": "http://localhost:8888",
+    "health_check": "http://localhost:8888/health",
+    "api_base": "http://localhost:8888/api",
+    "dashboard": "http://localhost:8080",
+    "container_name": "hexstrike-ai-platform",
+    "network": "hexstrike-network (172.20.0.0/24)"
+  },
+  "security_notes": {
+    "warning": "This tool provides AI agents with powerful system access",
+    "recommendation": "Run in isolated environments or dedicated security testing VMs",
+    "monitoring": "Monitor AI agent activities through the real-time dashboard",
+    "legal": "Only use for authorized penetration testing, bug bounty programs, CTF competitions, and security research"
+  }
+}

@@ -114,17 +114,49 @@ class ColoredFormatter(logging.Formatter):
     }
     
     def format(self, record):
-        emoji = self.EMOJIS.get(record.levelname, '📝')
-        color = self.COLORS.get(record.levelname, HexStrikeColors.BRIGHT_WHITE)
+        # Use emojis only on non-Windows systems or when encoding is safe
+        if platform.system() != "Windows":
+            emoji = self.EMOJIS.get(record.levelname, '📝')
+            color = self.COLORS.get(record.levelname, HexStrikeColors.BRIGHT_WHITE)
+            # Add color and emoji to the message
+            record.msg = f"{color}{emoji} {record.msg}{HexStrikeColors.RESET}"
+        else:
+            # Windows: use simple text prefixes instead of emojis
+            prefixes = {
+                "DEBUG": "[DEBUG]",
+                "INFO": "[INFO]", 
+                "WARNING": "[WARN]",
+                "ERROR": "[ERROR]",
+                "CRITICAL": "[CRIT]"
+            }
+            prefix = prefixes.get(record.levelname, "[LOG]")
+            record.msg = f"{prefix} {record.msg}"
         
-        # Add color and emoji to the message
-        record.msg = f"{color}{emoji} {record.msg}{HexStrikeColors.RESET}"
         return super().format(record)
 
-# Setup logging
+# Setup logging with Windows-compatible encoding
+import platform
+
+def safe_emoji(emoji_text, fallback_text):
+    """Return emoji on Unix-like systems, fallback text on Windows"""
+    if platform.system() == "Windows":
+        return fallback_text
+    return emoji_text
+
+# Configure encoding for Windows compatibility
+if platform.system() == "Windows":
+    # Use a simple format without emojis for Windows
+    log_format = "[HexStrike MCP] %(asctime)s [%(levelname)s] %(message)s"
+    # Set up stdout with UTF-8 encoding
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+else:
+    # Use emoji format for Unix-like systems
+    log_format = "[🔥 HexStrike MCP] %(asctime)s [%(levelname)s] %(message)s"
+
 logging.basicConfig(
     level=logging.INFO,
-    format="[🔥 HexStrike MCP] %(asctime)s [%(levelname)s] %(message)s",
+    format=log_format,
     handlers=[
         logging.StreamHandler(sys.stdout)
     ]
@@ -133,7 +165,7 @@ logging.basicConfig(
 # Apply colored formatter
 for handler in logging.getLogger().handlers:
     handler.setFormatter(ColoredFormatter(
-        "[🔥 HexStrike MCP] %(asctime)s [%(levelname)s] %(message)s",
+        log_format,
         datefmt="%Y-%m-%d %H:%M:%S"
     ))
 
@@ -5398,14 +5430,21 @@ def main():
     """Main entry point for the MCP server."""
     args = parse_args()
     
-    # Configure logging based on debug flag
-    if args.debug:
+    # For MCP mode, disable console logging to prevent JSON parsing issues
+    # Only log to stderr or disable entirely when running as MCP server
+    if not args.debug:
+        # Disable all logging to stdout when running as MCP server
+        logging.getLogger().setLevel(logging.CRITICAL)
+        for handler in logging.getLogger().handlers:
+            if isinstance(handler, logging.StreamHandler) and handler.stream.name == '<stdout>':
+                logging.getLogger().removeHandler(handler)
+    else:
         logger.setLevel(logging.DEBUG)
-        logger.debug("🔍 Debug logging enabled")
-    
-    # MCP compatibility: No banner output to avoid JSON parsing issues
-    logger.info(f"🚀 Starting HexStrike AI MCP Client v6.0")
-    logger.info(f"🔗 Connecting to: {args.server}")
+        # Even in debug mode, redirect logs to stderr to avoid JSON conflicts
+        import sys
+        for handler in logging.getLogger().handlers:
+            if isinstance(handler, logging.StreamHandler) and handler.stream.name == '<stdout>':
+                handler.stream = sys.stderr
     
     try:
         # Initialize the HexStrike AI client
